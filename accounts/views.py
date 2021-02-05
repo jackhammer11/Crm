@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from .models import *
 # Create your views here.
 from django.http import HttpResponse
-from .forms import OrderForm,CreateUserForm,CustomerForm
+from .forms import OrderForm,CreateUserForm,CustomerForm,ProductForm
 from django.forms import inlineformset_factory
 from .filters import OrderFilter
 from django.contrib.auth.forms import UserCreationForm
@@ -14,7 +14,7 @@ from .decorators import unauthenticated_user,allowed_user,admin_only
 
 from django.contrib.auth.models import Group
 
-
+from django import template
 
 
 @unauthenticated_user
@@ -65,7 +65,7 @@ def logout_view(request):
 	return redirect('login')
 
 
-
+ 
 
 
 
@@ -156,6 +156,8 @@ def accountSettings(request):
 @allowed_user(allowed_roles=['admin'])
 def products(request):
 	products =  Product.objects.all()
+	
+	
 	return render(request,'accounts/products.html',{'products':products})
 
 
@@ -175,13 +177,75 @@ def create_customer(request):
 	context = {'form':form}
 	return render(request,'accounts/account_settings.html',context)
 
+@login_required(login_url='login')
+@allowed_user(allowed_roles=['admin'])
+
+def add_product(request):
+	form = ProductForm()
+
+		
+	if request.method == 'POST':
+		form = ProductForm(request.POST)
+		if form.is_valid():
+			form.save()
+			return redirect('product')
+
+	context = {'form':form }
+
+	return render(request,'accounts/add_product.html',context)
+
+
+
+
+login_required(login_url='login')
+@allowed_user(allowed_roles=['admin'])
+def updateProduct(request,pk):
+		product = Product.objects.get(id = pk)
+		form = ProductForm(instance=product)
+		if request.method == "POST":
+		#print('Printing Post',request.POST)
+			form = ProductForm(request.POST,instance = product)
+			if form.is_valid():
+				form.save()
+				return redirect('product')
+
+
+		context = {'form':form}
+		return render(request,'accounts/add_product.html',context)
+
+
+
+login_required(login_url='login')
+@allowed_user(allowed_roles=['admin'])
+def deleteProduct(request,pk):
+
+	product = Product.objects.get(id = pk)
+	if request.method == 'POST':
+		product.delete()
+		return redirect('product')
+	context = {'item':product}
+	
+	return render(request,'accounts/delete_product.html',context)
+
+
+
+
+
 
 
 
 
 @login_required(login_url='login')
 @allowed_user(allowed_roles=['admin'])
-def customer(request,pk_test):
+def customer_page(request):
+	customers = Customer.objects.all()
+	context = {'customers':customers}
+	return render(request,'accounts/customer.html',context)
+
+
+@login_required(login_url='login')
+@allowed_user(allowed_roles=['admin'])
+def customer_info(request,pk_test):
 	customer = Customer.objects.get(id=pk_test)
 	orders = customer.order_set.all()
 	total_orders = orders.count()
@@ -190,7 +254,42 @@ def customer(request,pk_test):
 	orders = myFilter.qs
 
 	context = {'customer':customer ,'orders':orders,'total_orders':total_orders,'myFilter':myFilter}
-	return render(request,'accounts/customer.html',context)
+	return render(request,'accounts/customerinfo.html',context)
+
+
+
+
+
+
+
+
+
+@login_required(login_url='login')
+@allowed_user(allowed_roles=['admin'])
+def orders(request):
+	orders =  Order.objects.all()
+
+	#print(order.get().product_id)
+	products = Product.objects
+	customers = Customer.objects
+	#print(product)
+	i = 0
+	j = 0
+	for order in orders:
+		orders[i].product_name = products.get(id = order.product_id)
+		orders[j].customer_name = customers.get(id = order.customer_id)
+		i = i + 1
+		j = j + 1
+
+
+	
+	context = {'orders':orders,'products':products,'customers':customers}
+
+
+
+	
+	return render(request,'accounts/order.html',context)
+
 
 
 

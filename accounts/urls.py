@@ -4,8 +4,18 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('',views.home,name="home"),
     path('product/',views.products,name="product"),
-    path('customer/<str:pk_test>',views.customer,name="customer"),
+    path('customer/',views.customer_page,name="customer"),
+    path('order/',views.orders,name="order"),
+
+
+
+    path('customer_info/<str:pk_test>',views.customer_info,name="customer_info"), 
     path('create_customer/',views.create_customer,name="create_customer"),
+
+    path('add_product/',views.add_product,name="add_product"),
+    path('update_product/<str:pk>/',views.updateProduct,name="updateproduct"),
+    path('delete_product/<str:pk>/',views.deleteProduct,name="deleteproduct"),
+
     path('create_order/<str:pk>/',views.createOrder,name="create"),
     path('update_order/<str:pk>/',views.updateOrder,name="update"),
     path('delete_order/<str:pk>/',views.deleteOrder,name="delete"),

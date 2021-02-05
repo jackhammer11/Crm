@@ -6,7 +6,11 @@ from django.contrib.auth.models import User
 
 
 
-
+class ProductForm(ModelForm):
+	class Meta:
+		model = Product
+		fields = '__all__'
+		
 
 class CustomerForm(ModelForm):
 	class Meta:
@@ -26,3 +30,7 @@ class CreateUserForm(UserCreationForm):
 	class Meta:
 		model = User
 		fields = ['username','email','password1','password2']
+
+
+
+
